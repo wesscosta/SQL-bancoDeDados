@@ -1,0 +1,2 @@
+USE banco_v1;
+SHOW TABLES; SELECT COUNT(*) FROM pedidos;

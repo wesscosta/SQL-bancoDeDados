@@ -1,0 +1,34 @@
+Questões Aula 04
+
+Bloco 01
+
+1. Na tabela produtos, selecione e renomei as colunas Produto, Preço e Id Categoria
+
+2. Listar os cinco primeiros clientes em ordem alfabética
+
+3. Exiba as 3 lojas com maior numero de funcionarios, selecionando o nome e endereço.
+
+4. Listar produtos mais caros (top 5), com nome e preço, em ordem decrescente
+
+5. Selecionar o nome e sobrenome dos clientes e a quantidade de filhos, usando um alias para a quantidade de filhos.
+
+6. Mostre apenas os produtos com preço iguais ou maiores que R$1.800
+
+7. Mostre apenas os produtos com preços iguais a R$3.100
+
+8. Mostre apenas os produtos da marca DELL
+
+
+ 
+Bloco 2
+1. Busque todos os clientes cujo o nome começa com A
+ 
+2. Liste todos os clientes que contra do gmail
+ 
+3. Liste os clientes que sejam de São Paulo Capital
+ 
+4. Liste as Lojas que possui endereço na avenida
+ 
+5. liste os produtos que no numero de serie começe com MIC e termine com 11
+ 
+ 

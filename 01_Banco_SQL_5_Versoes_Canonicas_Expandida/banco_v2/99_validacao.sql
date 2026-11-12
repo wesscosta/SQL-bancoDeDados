@@ -1,0 +1,2 @@
+USE banco_v2;
+SHOW TABLES; SELECT COUNT(*) FROM vendedores; SHOW CREATE TABLE pedidos;

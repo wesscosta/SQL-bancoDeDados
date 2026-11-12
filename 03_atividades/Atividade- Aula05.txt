@@ -1,0 +1,38 @@
+Aula 05
+1.	Quantos clientes há em cada estado_civil
+
+2.	Qual a média da renda anual por estado civil
+
+3.	Quantas vezes cada produto foi vendido
+
+4.	Qual é o valor total vendido em cada loja
+
+5.	Qual é o valor médio dos pedidos de cada loja
+
+6.	Qual o preco medio dos produtos em cada categoria
+
+7.	Qual a preço minima e maxima de produtos por pedidos
+
+8.	Qual o produto mais vendido por data
+
+9.	Qual produto mais vendido em cada loja no dia 01 de cada mês
+
+10.	Qual é o valor total de vendas para cada cliente?
+
+11.	Qual é a média de quantidade de produtos vendidos por loja?
+
+12.	Quantos clientes diferentes cada loja atendeu
+
+13.	Qual é o menor e o maior valor de um pedido em cada loja?
+
+14.	Quantos pedidos foram feitos em cada local?
+
+15.	Qual é o valor total de produtos vendidos em cada local?
+
+16.	Qual é o produto mais barato e o mais caro em cada categoria?
+
+17.	Quantos produtos diferentes foram vendidos para cada cliente?
+
+18.	Qual é a quantidade total de produtos vendidos por categoria?
+
+ 
