@@ -1,10 +1,190 @@
+-- Evolução com SCHEMAS INDEPENDENTES: banco_v3 -> banco_v4.
+-- Execute em servidor que tenha banco_v3; falha se banco_v4 já existir.
+-- Não apaga ou altera banco_v3. NÃO use junto ao arquivo completo.
+SET NAMES utf8mb4;
+CREATE DATABASE `banco_v4` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE `banco_v4`;
+
+CREATE TABLE `categorias` (
+  `ID_Categoria` INT NOT NULL,
+  `Categoria` VARCHAR(80) NOT NULL,
+  PRIMARY KEY (`ID_Categoria`),
+  UNIQUE KEY `uk_categorias_nome` (`Categoria`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `locais` (
+  `ID_Local` INT NOT NULL,
+  `Cidade` VARCHAR(80) NOT NULL,
+  `Estado` CHAR(2) NOT NULL,
+  `Regiao` VARCHAR(30) NOT NULL,
+  PRIMARY KEY (`ID_Local`),
+  UNIQUE KEY `uk_locais_cidade_estado` (`Cidade`,`Estado`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `clientes` (
+  `ID_Cliente` INT NOT NULL,
+  `Nome` VARCHAR(80) NOT NULL,
+  `Sobrenome` VARCHAR(100) NOT NULL,
+  `Data_Nascimento` DATE,
+  `Estado_Civil` CHAR(1),
+  `Sexo` CHAR(1),
+  `Email` VARCHAR(150),
+  `Telefone` VARCHAR(20),
+  `Renda_Anual` DECIMAL(12,2),
+  `Qtd_Filhos` INT DEFAULT 0,
+  `Escolaridade` VARCHAR(60),
+  PRIMARY KEY (`ID_Cliente`),
+  UNIQUE KEY `uk_clientes_email` (`Email`),
+  CHECK (`Qtd_Filhos` IS NULL OR `Qtd_Filhos` >= 0),
+  CHECK (`Renda_Anual` IS NULL OR `Renda_Anual` >= 0)
+) ENGINE=InnoDB;
+
+CREATE TABLE `lojas` (
+  `ID_Loja` INT NOT NULL,
+  `Loja` VARCHAR(80) NOT NULL,
+  `Gerente` VARCHAR(120),
+  `Endereco` VARCHAR(255),
+  `Num_Funcionarios` INT,
+  `Telefone` VARCHAR(20),
+  `ID_Local` INT NOT NULL,
+  PRIMARY KEY (`ID_Loja`),
+  CONSTRAINT `fk_lojas_locais` FOREIGN KEY (`ID_Local`) REFERENCES `locais` (`ID_Local`),
+  CHECK (`Num_Funcionarios` IS NULL OR `Num_Funcionarios` >= 0)
+) ENGINE=InnoDB;
+
+CREATE TABLE `produtos` (
+  `ID_Produto` INT NOT NULL,
+  `Nome_Produto` VARCHAR(180) NOT NULL,
+  `ID_Categoria` INT NOT NULL,
+  `Marca_Produto` VARCHAR(80),
+  `Num_Serie` VARCHAR(40),
+  `Preco_Unit` DECIMAL(10,2) NOT NULL,
+  `Custo_Unit` DECIMAL(10,2),
+  PRIMARY KEY (`ID_Produto`),
+  UNIQUE KEY `uk_produtos_num_serie` (`Num_Serie`),
+  CONSTRAINT `fk_produtos_categorias` FOREIGN KEY (`ID_Categoria`) REFERENCES `categorias` (`ID_Categoria`),
+  CHECK (`Preco_Unit` >= 0),
+  CHECK (`Custo_Unit` IS NULL OR `Custo_Unit` >= 0)
+) ENGINE=InnoDB;
+
+CREATE TABLE `vendedores` (
+  `ID_Vendedor` INT NOT NULL AUTO_INCREMENT,
+  `Nome` VARCHAR(100) NOT NULL,
+  `Email` VARCHAR(150),
+  `Data_Nascimento` DATE,
+  `ID_Loja` INT NOT NULL,
+  PRIMARY KEY (`ID_Vendedor`),
+  UNIQUE KEY `uk_vendedores_email` (`Email`),
+  CONSTRAINT `fk_vendedores_lojas` FOREIGN KEY (`ID_Loja`) REFERENCES `lojas` (`ID_Loja`)
+) ENGINE=InnoDB;
+
+CREATE TABLE status_pedido (
+    ID_Status TINYINT NOT NULL,
+    Descricao VARCHAR(40) NOT NULL,
+    PRIMARY KEY (ID_Status),
+    CONSTRAINT uk_status_pedido_descricao UNIQUE (Descricao)
+) ENGINE=InnoDB;
+
+CREATE TABLE formas_pagamento (
+    ID_Forma TINYINT NOT NULL,
+    Descricao VARCHAR(40) NOT NULL,
+    PRIMARY KEY (ID_Forma),
+    CONSTRAINT uk_formas_pagamento_descricao UNIQUE (Descricao)
+) ENGINE=InnoDB;
+
+CREATE TABLE status_pagamento (
+    ID_Status TINYINT NOT NULL,
+    Descricao VARCHAR(40) NOT NULL,
+    PRIMARY KEY (ID_Status),
+    CONSTRAINT uk_status_pagamento_descricao UNIQUE (Descricao)
+) ENGINE=InnoDB;
+
+CREATE TABLE pedidos (
+    ID_Pedido INT NOT NULL,
+    Data_Pedido DATETIME NOT NULL,
+    ID_Loja INT NOT NULL,
+    ID_Cliente INT NOT NULL,
+    ID_Vendedor INT NULL,
+    ID_Status TINYINT NOT NULL,
+    Valor_Total DECIMAL(12,2) NOT NULL,
+    Custo_Total DECIMAL(12,2) NULL,
+    Origem_Registro VARCHAR(16) NOT NULL,
+    Observacao VARCHAR(255) NULL,
+    PRIMARY KEY (ID_Pedido),
+    KEY idx_pedidos_cliente (ID_Cliente),
+    KEY idx_pedidos_loja (ID_Loja),
+    KEY idx_pedidos_data (Data_Pedido),
+    KEY idx_pedidos_status (ID_Status),
+    KEY idx_pedidos_vendedor_loja (ID_Vendedor,ID_Loja),
+    CONSTRAINT ck_pedidos_valor CHECK (Valor_Total >= 0),
+    CONSTRAINT ck_pedidos_custo CHECK (Custo_Total IS NULL OR Custo_Total >= 0),
+    CONSTRAINT ck_pedidos_origem CHECK (
+        (Origem_Registro='LEGADO_V2' AND ID_Vendedor IS NULL AND ID_Status=5) OR
+        (Origem_Registro='OPERACAO_V3' AND ID_Vendedor IS NOT NULL AND ID_Status BETWEEN 1 AND 4)
+    ),
+    CONSTRAINT fk_pedidos_v3_clientes FOREIGN KEY (ID_Cliente) REFERENCES clientes(ID_Cliente),
+    CONSTRAINT fk_pedidos_v3_lojas FOREIGN KEY (ID_Loja) REFERENCES lojas(ID_Loja),
+    CONSTRAINT fk_pedidos_v3_status FOREIGN KEY (ID_Status) REFERENCES status_pedido(ID_Status),
+    CONSTRAINT fk_pedidos_v3_vendedor_loja FOREIGN KEY (ID_Vendedor, ID_Loja)
+        REFERENCES vendedores(ID_Vendedor, ID_Loja)
+) ENGINE=InnoDB;
+
+CREATE TABLE itens_pedido (
+    ID_Item INT NOT NULL AUTO_INCREMENT,
+    ID_Pedido INT NOT NULL,
+    ID_Produto INT NOT NULL,
+    Quantidade INT NOT NULL,
+    Preco_Unit DECIMAL(10,2) NOT NULL,
+    Custo_Unit DECIMAL(10,2) NULL,
+    Desconto_Valor DECIMAL(12,2) NOT NULL DEFAULT 0,
+    Ajuste_Valor DECIMAL(12,2) NOT NULL DEFAULT 0,
+    PRIMARY KEY (ID_Item),
+    CONSTRAINT uk_itens_pedido_produto UNIQUE (ID_Pedido, ID_Produto),
+    KEY idx_itens_pedido_produto (ID_Produto),
+    CONSTRAINT ck_itens_qtd CHECK (Quantidade > 0),
+    CONSTRAINT ck_itens_preco CHECK (Preco_Unit >= 0),
+    CONSTRAINT ck_itens_custo CHECK (Custo_Unit IS NULL OR Custo_Unit >= 0),
+    CONSTRAINT ck_itens_desconto CHECK (Desconto_Valor >= 0),
+    CONSTRAINT ck_itens_subtotal CHECK (
+        Quantidade * Preco_Unit - Desconto_Valor + Ajuste_Valor >= 0
+    ),
+    CONSTRAINT fk_itens_pedido_cabecalho FOREIGN KEY (ID_Pedido) REFERENCES pedidos(ID_Pedido),
+    CONSTRAINT fk_itens_pedido_produto FOREIGN KEY (ID_Produto) REFERENCES produtos(ID_Produto)
+) ENGINE=InnoDB;
+
+CREATE TABLE pagamentos (
+    ID_Pagamento INT NOT NULL AUTO_INCREMENT,
+    ID_Pedido INT NOT NULL,
+    ID_Forma TINYINT NOT NULL,
+    ID_Status TINYINT NOT NULL,
+    Valor_Pagamento DECIMAL(12,2) NOT NULL,
+    Data_Pagamento DATETIME NULL,
+    Observacao VARCHAR(255) NULL,
+    PRIMARY KEY (ID_Pagamento),
+    KEY idx_pagamentos_pedido (ID_Pedido),
+    CONSTRAINT ck_pagamentos_valor CHECK (Valor_Pagamento > 0),
+    CONSTRAINT ck_pagamentos_aprovado_data CHECK (ID_Status <> 2 OR Data_Pagamento IS NOT NULL),
+    CONSTRAINT fk_pagamentos_pedidos FOREIGN KEY (ID_Pedido) REFERENCES pedidos(ID_Pedido),
+    CONSTRAINT fk_pagamentos_formas FOREIGN KEY (ID_Forma) REFERENCES formas_pagamento(ID_Forma),
+    CONSTRAINT fk_pagamentos_status FOREIGN KEY (ID_Status) REFERENCES status_pagamento(ID_Status)
+) ENGINE=InnoDB;
+
+INSERT INTO `banco_v4`.`categorias` SELECT * FROM `banco_v3`.`categorias`;
+INSERT INTO `banco_v4`.`locais` SELECT * FROM `banco_v3`.`locais`;
+INSERT INTO `banco_v4`.`clientes` SELECT * FROM `banco_v3`.`clientes`;
+INSERT INTO `banco_v4`.`lojas` SELECT * FROM `banco_v3`.`lojas`;
+INSERT INTO `banco_v4`.`produtos` SELECT * FROM `banco_v3`.`produtos`;
+INSERT INTO `banco_v4`.`vendedores` SELECT * FROM `banco_v3`.`vendedores`;
+INSERT INTO `banco_v4`.`status_pedido` SELECT * FROM `banco_v3`.`status_pedido`;
+INSERT INTO `banco_v4`.`formas_pagamento` SELECT * FROM `banco_v3`.`formas_pagamento`;
+INSERT INTO `banco_v4`.`status_pagamento` SELECT * FROM `banco_v3`.`status_pagamento`;
+INSERT INTO `banco_v4`.`pedidos` SELECT * FROM `banco_v3`.`pedidos`;
+INSERT INTO `banco_v4`.`itens_pedido` SELECT * FROM `banco_v3`.`itens_pedido`;
+INSERT INTO `banco_v4`.`pagamentos` SELECT * FROM `banco_v3`.`pagamentos`;
+
+-- Evolução v3 -> v4: suprimentos, compras, estoque e rastreabilidade.
+-- Executar apenas sobre banco_v4 novo e integralmente copiado da v3.
 USE banco_v4;
-
-
--- ============================================================
--- Evolução canônica: banco_v3 -> banco_v4
--- Suprimentos, compras, estoque e rastreabilidade
--- ============================================================
 
 CREATE TABLE fornecedores (
     ID_Fornecedor INT NOT NULL AUTO_INCREMENT,
@@ -34,7 +214,6 @@ INSERT INTO fornecedores (Nome_Fornecedor,CNPJ,Telefone,Email) VALUES
 ('Audio Pro Supply','10.000.014/0001-14','(21) 3000-0014','contato14@fornecedor.local'),
 ('Office Gamer Parts','10.000.015/0001-15','(11) 3000-0015','contato15@fornecedor.local');
 
--- N:N produtos <-> fornecedores.
 CREATE TABLE produto_fornecedor (
     ID_Produto INT NOT NULL,
     ID_Fornecedor INT NOT NULL,
@@ -51,7 +230,7 @@ CREATE TABLE produto_fornecedor (
 INSERT INTO produto_fornecedor (ID_Produto,ID_Fornecedor,Preco_Compra,Fornecedor_Principal,Prazo_Dias)
 SELECT ID_Produto, 1+MOD(ID_Produto-1,15), ROUND(COALESCE(Custo_Unit,Preco_Unit*0.55)*0.95,2), TRUE, 5+MOD(ID_Produto,8)
 FROM produtos;
-INSERT IGNORE INTO produto_fornecedor (ID_Produto,ID_Fornecedor,Preco_Compra,Fornecedor_Principal,Prazo_Dias)
+INSERT INTO produto_fornecedor (ID_Produto,ID_Fornecedor,Preco_Compra,Fornecedor_Principal,Prazo_Dias)
 SELECT ID_Produto, 1+MOD(ID_Produto+4,15), ROUND(COALESCE(Custo_Unit,Preco_Unit*0.55)*1.03,2), FALSE, 7+MOD(ID_Produto,10)
 FROM produtos;
 
@@ -81,7 +260,6 @@ CREATE TABLE compras (
     CONSTRAINT fk_compras_status FOREIGN KEY (ID_Status_Compra) REFERENCES status_compra(ID_Status_Compra)
 ) ENGINE=InnoDB;
 
--- N:N compras <-> produtos.
 CREATE TABLE itens_compra (
     ID_Item_Compra INT NOT NULL AUTO_INCREMENT,
     ID_Compra INT NOT NULL,
@@ -101,7 +279,6 @@ CREATE TABLE itens_compra (
         REFERENCES produto_fornecedor(ID_Produto,ID_Fornecedor)
 ) ENGINE=InnoDB;
 
--- N:N lojas <-> produtos materializado pelo saldo atual.
 CREATE TABLE estoque (
     ID_Loja INT NOT NULL,
     ID_Produto INT NOT NULL,
@@ -130,9 +307,11 @@ CREATE TABLE historico_status_pedido (
     CONSTRAINT fk_hist_status_status FOREIGN KEY (ID_Status) REFERENCES status_pedido(ID_Status)
 ) ENGINE=InnoDB;
 
+-- Não fabricar uma cronologia operacional para registros LEGADO_V2.
 INSERT INTO historico_status_pedido (ID_Pedido,ID_Status,Data_Status,Observacao)
-SELECT ID_Pedido,ID_Status,Data_Pedido,'Estado migrado para histórico na criação da v4'
-FROM pedidos;
+SELECT ID_Pedido,ID_Status,Data_Pedido,'Estado inicial documentado do pedido sintético'
+FROM pedidos
+WHERE Origem_Registro='OPERACAO_V3';
 
 CREATE TABLE movimentacoes_estoque (
     ID_Movimentacao BIGINT NOT NULL AUTO_INCREMENT,
@@ -159,10 +338,10 @@ CREATE TABLE movimentacoes_estoque (
     CONSTRAINT fk_mov_estoque_compra FOREIGN KEY (ID_Compra) REFERENCES compras(ID_Compra)
 ) ENGINE=InnoDB;
 
--- O saldo inicial é registrado como ajuste rastreável.
+-- O saldo inicial é registrado como ajuste rastreável (independente do legado v2).
 INSERT INTO movimentacoes_estoque (ID_Loja,ID_Produto,Tipo_Movimentacao,Quantidade,Data_Movimentacao,Observacao)
 SELECT ID_Loja,ID_Produto,'AJUSTE',Quantidade,'2020-01-01 08:00:00','Saldo inicial da v4'
-FROM estoque WHERE Quantidade > 0;
+FROM estoque WHERE Quantidade>0;
 
 INSERT INTO compras (ID_Compra,Data_Compra,ID_Fornecedor,ID_Loja,ID_Status_Compra,Valor_Total) VALUES
 (1,'2020-01-01 09:03:00',1,4,2,13521.76),
@@ -215,7 +394,7 @@ INSERT INTO itens_compra (ID_Compra,ID_Produto,ID_Fornecedor,Quantidade,Custo_Un
 (16,1,1,10,985.32),
 (16,16,1,15,1067.20);
 
--- Entradas de compra geram movimento e atualizam o saldo atual.
+-- Compras recebidas geram movimento e atualizam estoque.
 INSERT INTO movimentacoes_estoque (
     ID_Loja,ID_Produto,Tipo_Movimentacao,Quantidade,Data_Movimentacao,ID_Compra,Observacao
 )
@@ -227,30 +406,28 @@ UPDATE estoque e
 JOIN (
     SELECT c.ID_Loja,ic.ID_Produto,SUM(ic.Quantidade) AS Qtd_Entrada
     FROM compras c JOIN itens_compra ic ON ic.ID_Compra=c.ID_Compra
-    WHERE c.ID_Status_Compra=2
-    GROUP BY c.ID_Loja,ic.ID_Produto
+    WHERE c.ID_Status_Compra=2 GROUP BY c.ID_Loja,ic.ID_Produto
 ) x ON x.ID_Loja=e.ID_Loja AND x.ID_Produto=e.ID_Produto
 SET e.Quantidade=e.Quantidade+x.Qtd_Entrada;
 
--- Algumas saídas históricas de venda para demonstrar rastreabilidade.
+-- Somente as vendas sintéticas v3 são usadas na simulação de saídas de estoque.
+-- Registros LEGADO_V2 antecedem o controle de estoque e não são reconstituídos como movimentação real.
 INSERT INTO movimentacoes_estoque (
     ID_Loja,ID_Produto,Tipo_Movimentacao,Quantidade,Data_Movimentacao,ID_Pedido,Observacao
 )
-SELECT p.ID_Loja,ip.ID_Produto,'SAIDA',ip.Quantidade,p.Data_Pedido,p.ID_Pedido,'Saída por venda'
+SELECT p.ID_Loja,ip.ID_Produto,'SAIDA',ip.Quantidade,p.Data_Pedido,p.ID_Pedido,'Saída por venda sintética'
 FROM pedidos p JOIN itens_pedido ip ON ip.ID_Pedido=p.ID_Pedido
-WHERE p.ID_Pedido >= 375;
+WHERE p.Origem_Registro='OPERACAO_V3';
 
+-- Só registrar saídas efetivas quando houver saldo; não usar GREATEST para mascarar rupturas.
 UPDATE estoque e
 JOIN (
     SELECT p.ID_Loja,ip.ID_Produto,SUM(ip.Quantidade) AS Qtd_Saida
     FROM pedidos p JOIN itens_pedido ip ON ip.ID_Pedido=p.ID_Pedido
-    WHERE p.ID_Pedido >= 375
+    WHERE p.Origem_Registro='OPERACAO_V3'
     GROUP BY p.ID_Loja,ip.ID_Produto
 ) x ON x.ID_Loja=e.ID_Loja AND x.ID_Produto=e.ID_Produto
-SET e.Quantidade=GREATEST(0,e.Quantidade-x.Qtd_Saida);
+SET e.Quantidade=e.Quantidade-x.Qtd_Saida;
 
--- Validações essenciais do novo domínio.
-SELECT ID_Pedido,COUNT(*) AS Itens FROM itens_pedido GROUP BY ID_Pedido HAVING COUNT(*)>1;
-SELECT ID_Compra,COUNT(*) AS Itens FROM itens_compra GROUP BY ID_Compra HAVING COUNT(*)>1;
-SELECT COUNT(*) AS Relacoes_Produto_Fornecedor FROM produto_fornecedor;
-SELECT COUNT(*) AS Saldos_Estoque FROM estoque;
+-- A conciliação das compras foi preservada conforme fonte; diferenças do Valor_Total
+-- em relação aos itens_compra devem ser auditadas, não reescritas silenciosamente.
