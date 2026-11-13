@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block conteudo %}<h2>{{ titulo }}</h2>
+{% if titulo == "Produtos" %}<form method="get">
+<label for="busca">Pesquisar pelo nome</label>
+<input id="busca" name="busca" value="{{ busca|default('') }}" maxlength="80">
+<button type="submit">Pesquisar</button></form>{% endif %}
+{% if titulo == "Categorias" %}<p><a href="{{ url_for('categoria_nova') }}">Cadastrar categoria</a></p>{% endif %}
+{% if titulo.startswith("Pedidos") %}<p><a href="{{ url_for('pedido_novo') }}">Novo pedido</a></p>{% endif %}
+{% if dados %}<div class="tabela"><table><thead><tr>
+{% for coluna in dados[0].keys() %}<th scope="col">{{ coluna }}</th>{% endfor %}
+{% if links_pedidos %}<th scope="col">Ação</th>{% endif %}
+</tr></thead><tbody>{% for linha in dados %}<tr>
+{% for campo in linha.values() %}<td>{{ campo if campo is not none else "Não informado" }}</td>{% endfor %}
+{% if links_pedidos %}<td><a href="{{ url_for('pedido_detalhe',pedido_id=linha.ID_Pedido) }}">Detalhes</a></td>{% endif %}
+</tr>{% endfor %}</tbody></table></div>
+{% else %}<p role="status">Nenhum registro encontrado.</p>{% endif %}
+{% endblock %}

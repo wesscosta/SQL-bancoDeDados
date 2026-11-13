@@ -1,0 +1,9 @@
+-- Desafios para os estudantes: execute no Workbench antes da integracao Flask.
+-- D01: liste clientes sem pedidos, usando NOT EXISTS.
+-- D02: liste pedidos com mais de um item e total conciliado.
+-- D03: calcule quantidade de unidades por produto e loja.
+-- D04: calcule valor de pedidos concluidos por cliente, sem multiplicar por JOIN.
+-- D05: mostre pedidos sem pagamento, sem supor que estao inadimplentes.
+-- D06: diferencie LEGADO_V2 (status desconhecido) de operacao contemporanea.
+-- D07: escreva uma operacao com BEGIN/COMMIT/ROLLBACK e simule violacao de FK.
+-- Para cada desafio registre: SQL, resultado esperado, observado e evidencia.

@@ -208,6 +208,54 @@ CREATE TABLE pagamentos (
 
 -- As operações históricas não possuem hora real; converter DATE em DATETIME usa 00:00:00.
 -- Duas inserções somente, em uma transação; DDL já foi concluído antes.
+-- DDL concluido. O procedimento faz ROLLBACK e sinaliza erro se a auditoria falhar.
+-- Nao use SELECTs exibidos ao usuario como substituto dos gates automaticos.
+DELIMITER $$
+CREATE PROCEDURE validar_migracao_legado_v3()
+BEGIN
+    DECLARE divergencias INT DEFAULT 0;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    IF (SELECT COUNT(*) FROM banco_v2.pedidos) <>
+       (SELECT COUNT(*) FROM pedidos WHERE Origem_Registro='LEGADO_V2') OR
+       (SELECT COUNT(*) FROM banco_v2.pedidos) <>
+       (SELECT COUNT(*) FROM itens_pedido) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Migracao v2-v3: contagens divergentes';
+    END IF;
+
+    IF NOT ((SELECT COALESCE(SUM(Receita_Venda),0) FROM banco_v2.pedidos) <=>
+            (SELECT COALESCE(SUM(Valor_Total),0) FROM pedidos
+             WHERE Origem_Registro='LEGADO_V2')) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Migracao v2-v3: receita divergente';
+    END IF;
+
+    SELECT COUNT(*) INTO divergencias
+    FROM banco_v2.pedidos AS o
+    LEFT JOIN pedidos AS p ON p.ID_Pedido=o.ID_Pedido
+    LEFT JOIN itens_pedido AS i ON i.ID_Pedido=o.ID_Pedido
+    WHERE p.ID_Pedido IS NULL OR i.ID_Item IS NULL
+       OR NOT (p.ID_Cliente <=> o.ID_Cliente)
+       OR NOT (p.ID_Loja <=> o.ID_Loja)
+       OR NOT (DATE(p.Data_Pedido) <=> o.Data_Venda)
+       OR NOT (p.Valor_Total <=> o.Receita_Venda)
+       OR NOT (p.Custo_Total <=> o.Custo_Venda)
+       OR NOT (p.Origem_Registro <=> 'LEGADO_V2')
+       OR p.ID_Vendedor IS NOT NULL OR p.ID_Status<>5
+       OR NOT (i.ID_Produto <=> o.ID_Produto)
+       OR NOT (i.Quantidade <=> o.Qtd_Vendida)
+       OR NOT (i.Preco_Unit <=> o.Preco_Unit)
+       OR NOT (i.Custo_Unit <=> o.Custo_Unit)
+       OR NOT (i.Ajuste_Valor <=> o.Receita_Venda-o.Qtd_Vendida*o.Preco_Unit);
+
+    IF divergencias<>0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Migracao v2-v3: divergencia linha a linha';
+    END IF;
+END$$
+DELIMITER ;
 START TRANSACTION;
 INSERT INTO pedidos (
     ID_Pedido,Data_Pedido,ID_Loja,ID_Cliente,ID_Vendedor,ID_Status,
@@ -233,9 +281,10 @@ SELECT (SELECT COUNT(*) FROM banco_v2.pedidos) AS Origem,
        (SELECT COUNT(*) FROM itens_pedido) AS Itens;
 SELECT (SELECT COALESCE(SUM(Receita_Venda),0) FROM banco_v2.pedidos) AS Receita_v2,
        (SELECT COALESCE(SUM(Valor_Total),0) FROM pedidos WHERE Origem_Registro='LEGADO_V2') AS Receita_v3;
--- Execução automatizada: inspecione o resultado e use ROLLBACK se houver divergência.
--- Para uma migração definitiva, execute os INSERTs de forma controlada no Workbench.
+-- Gate transacional: qualquer divergencia gera SIGNAL e ROLLBACK.
+CALL validar_migracao_legado_v3();
 COMMIT;
+DROP PROCEDURE validar_migracao_legado_v3;
 
 -- Dados NOVOS somente depois da reconciliação de registros históricos.
 INSERT INTO pedidos (ID_Pedido,Data_Pedido,ID_Loja,ID_Cliente,ID_Vendedor,ID_Status,Valor_Total,Custo_Total,Origem_Registro,Observacao) VALUES

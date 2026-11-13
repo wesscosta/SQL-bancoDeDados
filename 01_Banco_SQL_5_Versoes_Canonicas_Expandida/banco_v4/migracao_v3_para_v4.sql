@@ -75,6 +75,7 @@ CREATE TABLE `vendedores` (
   `ID_Loja` INT NOT NULL,
   PRIMARY KEY (`ID_Vendedor`),
   UNIQUE KEY `uk_vendedores_email` (`Email`),
+  UNIQUE KEY `uk_vendedores_vendedor_loja` (`ID_Vendedor`,`ID_Loja`),
   CONSTRAINT `fk_vendedores_lojas` FOREIGN KEY (`ID_Loja`) REFERENCES `lojas` (`ID_Loja`)
 ) ENGINE=InnoDB;
 

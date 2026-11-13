@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block conteudo %}<h2>Pagamento do pedido #{{ pedido_id }}</h2>
+<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label for="forma">Forma</label><select id="forma" name="forma" required>
+{% for f in formas %}<option value="{{ f.ID_Forma }}">{{ f.Descricao }}</option>{% endfor %}</select>
+<label for="status">Status</label><select id="status" name="status" required>
+{% for s in status %}<option value="{{ s.ID_Status }}">{{ s.Descricao }}</option>{% endfor %}</select>
+<label for="valor">Valor (R$)</label><input id="valor" name="valor" type="text" inputmode="decimal" required>
+<button type="submit">Registrar</button></form>{% endblock %}
