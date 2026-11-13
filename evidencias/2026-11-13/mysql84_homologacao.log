@@ -1,0 +1,127 @@
+MySQL 8.4.13 | direct
+IMPORT banco_v1/banco_completo.sql
+IMPORT banco_v2/banco_completo.sql
+OK v1 tables = 6
+OK v2 tables = 7
+OK v2 historical rows = 374
+IMPORT banco_v3/banco_v3_final.sql
+OK v3 tables = 12
+OK v3 FK unique names = 0
+OK v3 legacy count = 374
+OK v3 legacy unknown staff = 0
+OK v3 legacy payments = 0
+OK v3 historical revenue = 0
+OK v3 total/item divergence = 0
+OK v3 orphan items = 0
+OK v3 orders = 390
+OK v3 order items = 414
+OK v3 payments = 16
+IMPORT banco_v4/banco_v4_final.sql
+OK v4 tables = 20
+OK v4 FK unique names = 0
+OK v4 legacy count = 374
+OK v4 legacy unknown staff = 0
+OK v4 legacy payments = 0
+OK v4 historical revenue = 0
+OK v4 total/item divergence = 0
+OK v4 orphan items = 0
+OK v4 purchases without item = 0
+OK v4 purchase total divergence = 0
+OK v4 stock mismatches = 0
+OK v4 orders = 390
+OK v4 purchases = 16
+OK v4 stock rows = 128
+IMPORT banco_v5/banco_v5_final.sql
+banco_v5.clientes	analyze	status	OK
+banco_v5.produtos	analyze	status	OK
+banco_v5.pedidos	analyze	status	OK
+banco_v5.itens_pedido	analyze	status	OK
+banco_v5.pagamentos	analyze	status	OK
+banco_v5.estoque	analyze	status	OK
+OK v5 tables = 20
+OK v5 FK unique names = 0
+OK v5 legacy count = 374
+OK v5 legacy unknown staff = 0
+OK v5 legacy payments = 0
+OK v5 historical revenue = 0
+OK v5 total/item divergence = 0
+OK v5 orphan items = 0
+OK v5 purchases without item = 0
+OK v5 purchase total divergence = 0
+OK v5 stock mismatches = 0
+OK v5 clients = 10000
+OK v5 products = 500
+OK v5 orders = 100000
+OK v5 items = 249439
+OK v5 payments = 99626
+OK v5 stocks = 4000
+SNAPSHOT /tmp/tmp.ivh1CZJijw/direct.txt: 52 tabelas
+OK v1 tables = 6
+OK v2 tables = 7
+OK v2 historical rows = 374
+PASS direct
+MySQL 8.4.13 | migration
+IMPORT banco_v1/banco_completo.sql
+IMPORT banco_v2/banco_completo.sql
+OK v1 tables = 6
+OK v2 tables = 7
+OK v2 historical rows = 374
+IMPORT banco_v3/migracao_banco_v2_para_v3.sql
+374	374	374
+228900.00	228900.00
+OK v3 tables = 12
+OK v3 FK unique names = 0
+OK v3 legacy count = 374
+OK v3 legacy unknown staff = 0
+OK v3 legacy payments = 0
+OK v3 historical revenue = 0
+OK v3 total/item divergence = 0
+OK v3 orphan items = 0
+OK v3 orders = 390
+OK v3 order items = 414
+OK v3 payments = 16
+IMPORT banco_v4/migracao_v3_para_v4.sql
+OK v4 tables = 20
+OK v4 FK unique names = 0
+OK v4 legacy count = 374
+OK v4 legacy unknown staff = 0
+OK v4 legacy payments = 0
+OK v4 historical revenue = 0
+OK v4 total/item divergence = 0
+OK v4 orphan items = 0
+OK v4 purchases without item = 0
+OK v4 purchase total divergence = 0
+OK v4 stock mismatches = 0
+OK v4 orders = 390
+OK v4 purchases = 16
+OK v4 stock rows = 128
+IMPORT banco_v5/migracao_v4_para_v5.sql
+banco_v5.clientes	analyze	status	OK
+banco_v5.produtos	analyze	status	OK
+banco_v5.pedidos	analyze	status	OK
+banco_v5.itens_pedido	analyze	status	OK
+banco_v5.pagamentos	analyze	status	OK
+banco_v5.estoque	analyze	status	OK
+OK v5 tables = 20
+OK v5 FK unique names = 0
+OK v5 legacy count = 374
+OK v5 legacy unknown staff = 0
+OK v5 legacy payments = 0
+OK v5 historical revenue = 0
+OK v5 total/item divergence = 0
+OK v5 orphan items = 0
+OK v5 purchases without item = 0
+OK v5 purchase total divergence = 0
+OK v5 stock mismatches = 0
+OK v5 clients = 10000
+OK v5 products = 500
+OK v5 orders = 100000
+OK v5 items = 249439
+OK v5 payments = 99626
+OK v5 stocks = 4000
+SNAPSHOT /tmp/tmp.ivh1CZJijw/migration.txt: 52 tabelas
+OK v1 tables = 6
+OK v2 tables = 7
+OK v2 historical rows = 374
+PASS migration
+PASS: integridade e dados idênticos entre instalação direta e migrações em MySQL 8.4

@@ -61,4 +61,6 @@ PORTAL_PYTHON=python bash tools/run_flask_mysql84_live.sh
 
 ## Limitações
 
-Os logs dos testes estão na execução local; o workflow do GitHub Actions permanece **não publicado** por falta de permissão da integração para gravar em `.github/workflows/`. O starter é um ambiente de aprendizagem, não um ERP homologado para produção; não substitui controles de acesso, autorização e auditoria transacional de um sistema público.
+O repositório auditado não inclui um script canônico de migração **v1→v2**. Ambos os modos de homologação instalam v1 e v2 diretamente; a cadeia de migração executável e validada é **v2→v3→v4→v5**. Não declarar v1→v2 como migração homologada. Um script novo deve ser derivado e validado separadamente do material da Atividade 08, sem modificar as bases canônicas.
+
+Os logs locais dos testes foram incluídos em `evidencias/2026-11-13/`; o workflow do GitHub Actions permanece **não publicado** por falta de permissão da integração para gravar em `.github/workflows/`. O starter é um ambiente de aprendizagem, não um ERP homologado para produção; não substitui controles de acesso, autorização e auditoria transacional de um sistema público.
