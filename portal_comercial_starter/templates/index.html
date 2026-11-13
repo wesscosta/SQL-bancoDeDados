@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block conteudo %}
+<h2>Operação comercial em banco_v3</h2>
+<p>Consulte o catálogo, explore pedidos com múltiplos itens e teste operações de escrita em um banco de laboratório.</p>
+<p><a href="{{ url_for('pedido_novo') }}">Criar pedido com 2 produtos</a> ·
+<a href="{{ url_for('categoria_nova') }}">Cadastrar categoria</a></p>
+<p>Os registros históricos da v2 não recebem pagamentos nem vendedores inventados.</p>
+{% endblock %}

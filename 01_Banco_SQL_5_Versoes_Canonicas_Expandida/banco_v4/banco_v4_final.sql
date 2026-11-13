@@ -1,7 +1,7 @@
 -- Banco de Dados & SQL | banco_v4 FINAL: v3 + suprimentos (independente da v2)
 -- Compatível com MySQL 8.0.16+ / MySQL 8.4, InnoDB.
--- FONTE: banco_v2, dados do arquivo canônico banco_completo_v3.sql fornecido.
--- Execução única: falha caso banco_v3 já exista. NÃO exclui nem modifica banco_v2.
+-- Fonte: conjunto canônico independente banco_v4; preserva as versões anteriores.
+-- Execução única: falha se banco_v4 já existir. Não apaga outras bases.
 -- Não renomeia pedidos nem utiliza pedidos_legacy.
 -- Histórico v2: preserva registros, vendedores/status/pagamento desconhecidos;
 -- 00:00:00 em Data_Pedido do legado marca hora não informada, não hora real da venda.
