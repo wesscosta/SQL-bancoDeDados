@@ -5,9 +5,13 @@ SELECT (SELECT COUNT(*) FROM banco_v2.pedidos) AS Origem,
        (SELECT COUNT(*) FROM banco_v3.itens_pedido AS i
         JOIN banco_v3.pedidos AS p ON p.ID_Pedido=i.ID_Pedido
         WHERE p.Origem_Registro='LEGADO_V2') AS Itens;
+        
+        
 SELECT (SELECT COALESCE(SUM(Receita_Venda),0) FROM banco_v2.pedidos) AS Receita_v2,
        (SELECT COALESCE(SUM(Valor_Total),0) FROM banco_v3.pedidos
         WHERE Origem_Registro='LEGADO_V2') AS Receita_v3;
+        
+        
 SELECT COUNT(*) AS Divergencias_Linha_A_Linha
 FROM banco_v2.pedidos AS origem
 LEFT JOIN banco_v3.pedidos AS cab ON cab.ID_Pedido=origem.ID_Pedido
