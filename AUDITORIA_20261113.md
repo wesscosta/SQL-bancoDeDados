@@ -27,7 +27,7 @@
 - v5: 100.000 pedidos, 249.439 itens, 99.626 pagamentos e 4.000 saldos de estoque.
 - Divergências de total entre pedidos e itens, total entre compras e itens, estoque e movimentação: zero nas verificações MySQL.
 - Teste negativo de migração: falha intencional detectada por `SIGNAL`, seguida de `ROLLBACK`.
-- Flask: testes automatizados de rotas/contratos e integração MySQL real com pedido multi-item e pagamento. Conferir log de CI para evidência remota.
+- Flask: 14 testes de rotas/contratos aprovados (1 teste de integração ignorado sem banco) e 1 teste de integração MySQL 8.4 aprovado em contêiner real, com pedido multi-item e pagamento. A publicação do workflow CI ficou bloqueada por permissões do GitHub.
 
 ## Projeto Flask
 
@@ -61,4 +61,4 @@ PORTAL_PYTHON=python bash tools/run_flask_mysql84_live.sh
 
 ## Limitações
 
-Os logs ficam na execução local e no GitHub Actions após o PR. O starter é um ambiente de aprendizagem, não um ERP homologado para produção; não substitui controles de acesso, autorização e auditoria transacional de um sistema público.
+Os logs dos testes estão na execução local; o workflow do GitHub Actions permanece **não publicado** por falta de permissão da integração para gravar em `.github/workflows/`. O starter é um ambiente de aprendizagem, não um ERP homologado para produção; não substitui controles de acesso, autorização e auditoria transacional de um sistema público.

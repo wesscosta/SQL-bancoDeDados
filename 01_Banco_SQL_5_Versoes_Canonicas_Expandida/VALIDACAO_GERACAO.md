@@ -37,7 +37,7 @@ bash tools/test_migration_guard.sh
 python3 tools/build_archives.py --check
 ```
 
-O workflow `.github/workflows/mysql84-homologacao.yml` contém os mesmos gates. Verifique o status do GitHub Actions após abrir o PR; os testes locais **não** são evidência de que a execução remota já concluiu.
+O workflow foi preparado localmente, porém o GitHub recusou sua publicação por falta de permissão de workflow na credencial. Até regularizar a permissão, execute os três comandos acima manualmente: **não há homologação CI publicada nesta branch**.
 
 ## Testes negativos
 
