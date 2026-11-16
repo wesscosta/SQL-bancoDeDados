@@ -15,17 +15,16 @@ for i in {1..90}; do
   sleep 1
 done
 sql -e 'SELECT VERSION();'
-# Apenas a copia: cria banco_v3_lab, sem alterar o banco canônico nem uma base real.
-sed -e 's/\x60banco_v3\x60/\x60banco_v3_lab\x60/g' \
-  "$ROOT/01_Banco_SQL_5_Versoes_Canonicas_Expandida/banco_v3/banco_v3_final.sql" | sql
+# Instancia MySQL efemera: cria somente banco_v3 dentro do container descartavel.
+sql < "$ROOT/01_Banco_SQL_5_Versoes_Canonicas_Expandida/banco_v3/banco_v3_final.sql"
 sql < "$ROOT/portal_comercial_starter/sql/preparar_lab.sql"
 sql -e "CREATE USER 'portal_test'@'%' IDENTIFIED BY '$PASSWORD';"
-sql -e "GRANT SELECT,INSERT,UPDATE ON banco_v3_lab.* TO 'portal_test'@'%';"
+sql -e "GRANT SELECT,INSERT,UPDATE ON banco_v3.* TO 'portal_test'@'%';"
 BINDING="$(docker port "$CN" 3306/tcp)"
 PORT="${BINDING##*:}"
 echo "MySQL teste exposto somente em 127.0.0.1:$PORT"
 cd "$ROOT/portal_comercial_starter"
 PORTAL_INTEGRATION=1 FLASK_SECRET_KEY=teste-local \
-  DB_HOST=127.0.0.1 DB_PORT="$PORT" DB_NAME=banco_v3_lab \
+  DB_HOST=127.0.0.1 DB_PORT="$PORT" DB_NAME=banco_v3 \
   DB_USER=portal_test DB_PASSWORD="$PASSWORD" \
   "$PY" -m pytest -q tests/test_mysql_live.py

@@ -13,14 +13,19 @@ from conexao import conectar, consultar
 load_dotenv()
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "")
+if not app.config["SECRET_KEY"]:
+    raise RuntimeError("Defina FLASK_SECRET_KEY no arquivo .env antes de iniciar o portal.")
 app.config["MAX_CONTENT_LENGTH"] = 128 * 1024
 CSRFProtect(app)
 
 
 def ler_inteiro(valor, minimo=1):
-    numero = int(valor)
+    try:
+        numero = int(valor)
+    except (TypeError, ValueError):
+        raise ValueError("Informe apenas números inteiros nos campos numéricos.") from None
     if numero < minimo:
-        raise ValueError("Número fora do intervalo permitido")
+        raise ValueError("Número fora do intervalo permitido.")
     return numero
 
 
@@ -216,7 +221,7 @@ def pedido_novo():
             custos = [precos[i]["Custo_Unit"] for i in ids]
             custo_total = (sum((Decimal(c) * q for c, q in zip(custos, quantidades)), Decimal("0.00"))
                            if all(c is not None for c in custos) else None)
-            # Tabela de sequência preparada SOMENTE na cópia de laboratório.
+            # Tabela de sequência preparada na banco_v3 pelo script sql/preparar_lab.sql.
             # INSERT auto_increment é concorrente e dispensa MAX(ID)+1.
             cur.execute("INSERT INTO portal_ids_pedido () VALUES ()")
             pedido_id = cur.lastrowid

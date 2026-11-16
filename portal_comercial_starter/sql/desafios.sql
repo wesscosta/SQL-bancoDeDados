@@ -6,4 +6,8 @@
 -- D05: mostre pedidos sem pagamento, sem supor que estao inadimplentes.
 -- D06: diferencie LEGADO_V2 (status desconhecido) de operacao contemporanea.
 -- D07: escreva uma operacao com BEGIN/COMMIT/ROLLBACK e simule violacao de FK.
+-- D08: implemente UPDATE parametrizado para categoria e produto.
+-- D09: controle total de pagamentos aprovados sob transacao e bloqueio da linha do pedido.
+-- D10: prove que relatorios nao duplicam receitas ao juntar pedidos e itens.
+
 -- Para cada desafio registre: SQL, resultado esperado, observado e evidencia.

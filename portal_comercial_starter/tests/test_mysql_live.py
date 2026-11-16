@@ -5,7 +5,7 @@ import mysql.connector
 import pytest
 
 pytestmark = pytest.mark.skipif(os.getenv("PORTAL_INTEGRATION") != "1",
-                                reason="Requer banco_v3_lab isolado")
+                                reason="Requer MySQL descartavel com banco_v3 preparada")
 
 from app import app
 from conexao import conectar, consultar

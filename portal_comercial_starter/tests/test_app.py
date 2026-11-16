@@ -133,3 +133,22 @@ def test_csrf_sem_token_rejeitado(client):
         }).status_code == 400
     finally:
         modulo.app.config["WTF_CSRF_ENABLED"] = False
+
+
+def test_quantidade_nao_numerica_sem_mensagem_interna(client, monkeypatch):
+    class Con:
+        def rollback(self):
+            pass
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(modulo, "consultar", lambda sql, params=(): [])
+    monkeypatch.setattr(modulo, "conectar", lambda: Con())
+    r = client.post("/pedidos/novo", data={
+        "cliente": "1", "loja": "1", "vendedor": "1",
+        "produto": ["1", "2"], "quantidade": ["xyz", "1"],
+    })
+    assert r.status_code == 200
+    assert b"invalid literal" not in r.data
+    assert "números inteiros".encode() in r.data
