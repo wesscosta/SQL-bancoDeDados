@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block titulo %}Portal Comercial{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}"></head>
+<body>
+<header><h1>Portal Comercial · banco_v3</h1>
+<nav aria-label="Navegação principal">
+<a href="{{ url_for('inicio') }}">Início</a>
+<a href="{{ url_for('produtos') }}">Produtos</a>
+<a href="{{ url_for('categorias') }}">Categorias</a>
+<a href="{{ url_for('clientes') }}">Clientes</a>
+<a href="{{ url_for('locais') }}">Locais</a>
+<a href="{{ url_for('lojas') }}">Lojas</a>
+<a href="{{ url_for('vendedores') }}">Vendedores</a>
+<a href="{{ url_for('pedidos') }}">Pedidos</a>
+<a href="{{ url_for('relatorios') }}">Relatórios</a>
+<a href="{{ url_for('sobre') }}">Sobre</a>
+</nav></header>
+<main>
+{% with avisos = get_flashed_messages() %}{% for msg in avisos %}
+<p role="status" class="aviso">{{ msg }}</p>{% endfor %}{% endwith %}
+{% block conteudo %}{% endblock %}
+</main><footer>Exclusivo para laboratório local. Não publicar na internet.</footer>
+</body></html>

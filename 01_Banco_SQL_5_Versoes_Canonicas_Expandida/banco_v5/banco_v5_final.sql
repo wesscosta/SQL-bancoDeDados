@@ -1,7 +1,7 @@
 -- Banco de Dados & SQL | banco_v5 FINAL: v4 + performance (independente da v2)
 -- Compatível com MySQL 8.0.16+ / MySQL 8.4, InnoDB.
--- FONTE: banco_v2, dados do arquivo canônico banco_completo_v3.sql fornecido.
--- Execução única: falha caso banco_v3 já exista. NÃO exclui nem modifica banco_v2.
+-- Fonte: conjunto canônico independente banco_v5; preserva as versões anteriores.
+-- Execução única: falha se banco_v5 já existir. Não apaga outras bases.
 -- Não renomeia pedidos nem utiliza pedidos_legacy.
 -- Histórico v2: preserva registros, vendedores/status/pagamento desconhecidos;
 -- 00:00:00 em Data_Pedido do legado marca hora não informada, não hora real da venda.
@@ -1483,12 +1483,17 @@ SET e.Quantidade=e.Quantidade-x.Qtd_Saida;
 -- Os pedidos gerados para performance são dados sintéticos, não lançamentos de estoque.
 USE banco_v5;
 
-CREATE TEMPORARY TABLE tmp_digits (n TINYINT PRIMARY KEY);
-INSERT INTO tmp_digits VALUES (0),(1),(2),(3),(4),(5),(6),(7),(8),(9);
+-- MySQL nao permite reabrir a mesma tabela TEMPORARY com varios aliases.
+-- CTE de digitos reutilizavel, compatível com MySQL 8.4.
 CREATE TEMPORARY TABLE tmp_seq AS
+WITH digits AS (
+    SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3
+    UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6
+    UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
+)
 SELECT 1 + a.n + 10*b.n + 100*c.n + 1000*d.n + 10000*e.n AS n
-FROM tmp_digits a CROSS JOIN tmp_digits b CROSS JOIN tmp_digits c
-CROSS JOIN tmp_digits d CROSS JOIN tmp_digits e
+FROM digits a CROSS JOIN digits b CROSS JOIN digits c
+CROSS JOIN digits d CROSS JOIN digits e
 WHERE 1 + a.n + 10*b.n + 100*c.n + 1000*d.n + 10000*e.n <= 100000;
 ALTER TABLE tmp_seq ADD PRIMARY KEY (n);
 
@@ -1634,5 +1639,5 @@ WHERE p.Origem_Registro='OPERACAO_V3'
 );
 
 DROP TEMPORARY TABLE tmp_seq;
-DROP TEMPORARY TABLE tmp_digits;
+-- digits CTE nao requer limpeza de tabela temporaria.
 ANALYZE TABLE clientes,produtos,pedidos,itens_pedido,pagamentos,estoque;

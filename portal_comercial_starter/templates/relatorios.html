@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block conteudo %}<h2>Indicadores comerciais</h2>
+<p><strong>Valor registrado</strong> não é sinônimo de dinheiro recebido: inclui pedidos pendentes, cancelados e históricos sem status conhecido.</p>
+<h3>Pedidos por loja</h3><table><thead><tr><th>Loja</th><th>Pedidos</th><th>Valor registrado</th></tr></thead><tbody>
+{% for r in por_loja %}<tr><td>{{ r.Loja }}</td><td>{{ r.Qtd_Pedidos }}</td><td>{{ r.Valor_Registrado }}</td></tr>{% endfor %}</tbody></table>
+<h3>Pedidos por status</h3><table><thead><tr><th>Status</th><th>Pedidos</th></tr></thead><tbody>
+{% for r in por_status %}<tr><td>{{ r.Status }}</td><td>{{ r.Quantidade }}</td></tr>{% endfor %}</tbody></table>
+<h3>Produtos mais vendidos</h3><table><thead><tr><th>Produto</th><th>Unidades</th></tr></thead><tbody>
+{% for r in mais_vendidos %}<tr><td>{{ r.Nome_Produto }}</td><td>{{ r.Unidades }}</td></tr>{% endfor %}</tbody></table>{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block conteudo %}<h2>Pedido #{{ pedido.ID_Pedido }}</h2>
+<dl><dt>Cliente</dt><dd>{{ pedido.Cliente }}</dd>
+<dt>Loja</dt><dd>{{ pedido.Loja }}</dd>
+<dt>Vendedor</dt><dd>{{ pedido.Vendedor or "Não informado no histórico" }}</dd>
+<dt>Status</dt><dd>{{ pedido.Status }}</dd>
+<dt>Origem</dt><dd>{{ pedido.Origem_Registro }}</dd>
+<dt>Valor total</dt><dd>R$ {{ pedido.Valor_Total }}</dd></dl>
+<h3>Itens</h3>
+<table><thead><tr><th>Produto</th><th>Quantidade</th><th>Preço</th><th>Desconto</th><th>Ajuste histórico</th><th>Subtotal</th></tr></thead>
+<tbody>{% for i in itens %}<tr><td>{{ i.Nome_Produto }}</td><td>{{ i.Quantidade }}</td><td>{{ i.Preco_Unit }}</td>
+<td>{{ i.Desconto_Valor }}</td><td>{{ i.Ajuste_Valor }}</td><td>{{ i.Subtotal }}</td></tr>{% endfor %}</tbody></table>
+<h3>Pagamentos registrados</h3>
+{% if pagamentos %}<table><thead><tr><th>Forma</th><th>Status</th><th>Valor</th><th>Data</th></tr></thead>
+<tbody>{% for p in pagamentos %}<tr><td>{{ p.Forma }}</td><td>{{ p.Status }}</td><td>{{ p.Valor_Pagamento }}</td><td>{{ p.Data_Pagamento or "Não informado" }}</td></tr>{% endfor %}</tbody></table>
+{% else %}<p>Não existem pagamentos registrados. Isso não prova inadimplência.</p>{% endif %}
+{% if pedido.Origem_Registro == "OPERACAO_V3" %}
+<p><a href="{{ url_for('pagamento_novo',pedido_id=pedido.ID_Pedido) }}">Registrar pagamento</a></p>
+{% endif %}{% endblock %}

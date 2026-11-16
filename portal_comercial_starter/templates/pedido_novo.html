@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block conteudo %}<h2>Novo pedido</h2>
+<p>Cadastre dois produtos diferentes. O preço é obtido do banco no momento de salvar.</p>
+<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label for="cliente">Cliente</label><select id="cliente" name="cliente" required>
+{% for c in clientes %}<option value="{{ c.ID_Cliente }}">{{ c.Nome }} {{ c.Sobrenome }}</option>{% endfor %}
+</select>
+<label for="loja">Loja</label><select id="loja" name="loja" required>
+{% for l in lojas %}<option value="{{ l.ID_Loja }}">{{ l.Loja }}</option>{% endfor %}</select>
+<label for="vendedor">Vendedor da loja</label><select id="vendedor" name="vendedor" required>
+{% for v in vendedores %}<option value="{{ v.ID_Vendedor }}">{{ v.Nome }} (loja {{ v.ID_Loja }})</option>{% endfor %}
+</select>
+{% for pos in [1,2] %}
+<fieldset><legend>Item {{ pos }}</legend>
+<label for="produto{{ pos }}">Produto</label><select id="produto{{ pos }}" name="produto" required>
+{% for p in produtos %}<option value="{{ p.ID_Produto }}">{{ p.Nome_Produto }} — R$ {{ p.Preco_Unit }}</option>{% endfor %}
+</select>
+<label for="quantidade{{ pos }}">Quantidade</label><input id="quantidade{{ pos }}" type="number" name="quantidade" value="1" min="1" max="100" required>
+</fieldset>{% endfor %}
+<button type="submit">Registrar pedido</button>
+</form><p>Se o vendedor não pertencer à loja ou o segundo produto se repetir, o pedido é rejeitado.</p>
+{% endblock %}

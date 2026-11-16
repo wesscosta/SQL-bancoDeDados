@@ -1,0 +1,9 @@
+VERSION()
+8.4.13
+maior_pedido
+390
+sequencia_reservada
+390
+MySQL teste exposto somente em 127.0.0.1:32770
+.                                                                        [100%]
+1 passed in 0.51s

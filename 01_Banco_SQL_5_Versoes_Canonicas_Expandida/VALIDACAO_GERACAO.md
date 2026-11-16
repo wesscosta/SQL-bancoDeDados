@@ -1,25 +1,48 @@
-# Validação da geração — versões expandidas
+# Evidências de validação e homologação
 
-Validação estática realizada após a reconstrução.
+## Referência inicial
 
-## Estrutura final
+Auditoria da `main` em 13/11/2026: commit `fccd8cf742f5e814d355b29ce3f9e04c9804c6b0`, mensagem *update v4 and v5*.
 
-- `banco_v1`: 6 tabelas — base inicial.
-- `banco_v2`: 7 tabelas — integridade + vendedores.
-- `banco_v3`: 12 tabelas finais — inclui `itens_pedido`, status e pagamentos.
-- `banco_v4`: 20 tabelas finais — inclui `produto_fornecedor`, `compras`, `itens_compra`, `estoque`, movimentos e histórico.
-- `banco_v5`: mesmas 20 tabelas da v4, com carga ampliada.
+A revisão anterior declarava **somente validação estática**; não era prova de execução MySQL.
 
-## Checagens executadas
+## Contratos esperados
 
-- FKs locais e colunas referenciadas verificadas nas versões v3–v5: **sem referências ausentes**.
-- `itens_pedido` não contém `ID_Fornecedor`.
-- `itens_compra` contém `ID_Fornecedor` e usa FKs compostas para validar compra/fornecedor e produto/fornecedor.
-- Itens de compra sintéticos verificados contra `produto_fornecedor`: **0 incompatibilidades**.
-- 16 pedidos multi-itens de demonstração na v3, com 40 itens no total.
-- Totais dos pedidos multi-itens comparados com quantidade × preço − desconto: **0 divergências**.
-- Migrações não contêm sequências literais `\\n` inválidas.
+- v1: 6 tabelas.
+- v2: 7 tabelas, 374 pedidos.
+- v3: 12 tabelas; 374 pedidos históricos, 16 pedidos de demonstração, 414 itens e 16 pagamentos, nenhum histórico com pagamento.
+- v4: 20 tabelas, 390 pedidos, 16 compras e 128 saldos de estoque.
+- v5: 20 tabelas, 10.000 clientes, 500 produtos, 100.000 pedidos, 249.439 itens, 99.626 pagamentos e 4.000 saldos de estoque.
 
-## Limite da validação
+## Defeitos observados no MySQL 8.4.13 antes da correção
 
-Não havia uma instância MySQL disponível na sessão para executar os scripts ponta a ponta. Por isso, cada versão inclui `99_validacao.sql` para conferência após a importação em MySQL 8.0+/8.4.
+1. Na instalação direta v5, erro `1137 (HY000)` na geração da tabela de sequência `tmp_digits` com múltiplos aliases.
+2. Na migração v3→v4, erro `6125 (HY000)`: FK composta para vendedores sem índice único correspondente.
+3. O verificador anterior usava caminhos inexistentes e executava `DROP DATABASE` mesmo sem garantias de isolamento.
+
+## Correções executadas
+
+- Geração de sequências v5 com CTE de dígitos, compatível com MySQL 8.4, tanto na carga direta quanto na migração.
+- Criação explícita do índice composto `(ID_Vendedor,ID_Loja)` nos scripts de migração v4 e v5.
+- Reconciliação automática, `SIGNAL` e `ROLLBACK` na cópia histórica v2→v3.
+- Verificador refeito com dois contêineres descartáveis, sem usar MySQL externo nem excluir bancos existentes.
+- Correção dos cabeçalhos diretos v4 e v5.
+- Atualização dos arquivos ZIP por reprodução determinística.
+
+## Reproduzir
+
+```bash
+bash 01_Banco_SQL_5_Versoes_Canonicas_Expandida/verificar.sh
+bash tools/test_migration_guard.sh
+python3 tools/build_archives.py --check
+```
+
+O workflow foi preparado localmente, porém o GitHub recusou sua publicação por falta de permissão de workflow na credencial. Até regularizar a permissão, execute os três comandos acima manualmente: **não há homologação CI publicada nesta branch**.
+
+## Testes negativos
+
+`tools/test_migration_guard.sh` gera uma variante defeituosa temporária da migração e confirma erro `SQLSTATE 45000`, com zero registros confirmados em pedidos/itens após rollback. O script canônico não é adulterado.
+
+## Limites
+
+Os testes cobrem os invariantes descritos, mas não substituem um teste de carga, uma auditoria financeira externa nem uma revisão de segurança de uma aplicação publicada. O Portal Flask é exclusivo para ambiente local de laboratório.

@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block conteudo %}<h2>Cadastrar categoria</h2>
+<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label for="id_categoria">ID da categoria</label><input id="id_categoria" name="id_categoria" type="number" min="1" required>
+<label for="nome">Nome</label><input id="nome" name="nome" maxlength="80" required>
+<button type="submit">Salvar</button></form>
+<p>Exercício: provoque um ID repetido e explique a constraint UNIQUE/PRIMARY KEY.</p>{% endblock %}
